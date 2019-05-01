@@ -61,12 +61,37 @@ class DataBase(object):
         res = self.connection.execute(insert)
         return res
 
-    def create_payment(self, **kargs):
-        # TODO: Define create payment
-        pass
+    def create_payment(self, agent, amount, method, transactions, check_number=None, comment=None):
+
+        # Create new payment object
+        ts = datetime.now()
+        kwargs = {
+            'ts':ts,
+            'agent':agent,
+            'amount':amount,
+            'method':method,
+            'check_number':check_number,
+            'comment':comment
+        }
+
+        insert = payment_table.insert().values(**kwargs)
+        res = self.connection.execute(insert)
+        if not res:
+            raise(Exception('Insertion Failed'))
+
+        payment_id = res.lastrowid
+
+        # Create entries in payment_transaction table
+        # transactions is a list of transaction IDs.
+
+        args = [ {'payment_id': payment_id, 'transaction_id':t} for t in transactions ]
+        insert = payment_transaction_table.insert()
+        res = self.connection.execute(insert, args)
+        
+        return res
+
 
     # ===== User Functions ===== #
-
     def create_transaction(self, user_id, budget, year, term, approver_id, transaction_date, amount, payment_method, comment, receipt_path):
         timestamp = datetime.now()
         kwargs = {
@@ -107,8 +132,11 @@ if __name__ == '__main__':
 
     # Test creating a new transaction
     today = date.today()
-    db.create_transaction(1, 'tech_chair', 2019, 'spring', 1, today, 0.69, 'venmo', 'hello', '~/Documents/Desktop/image')
+    res = db.create_transaction(1, 'tech_chair', 2019, 'spring', 1, today, 0.69, 'venmo', 'hello', '~/Documents/Desktop/image')
+    transaction_id = res.lastrowid
 
+    # Test creating a payment
+    db.create_payment(1, 2.34, 'venmo', [1,transaction_id], check_number=None, comment=None)
 
 
     print(db.engine, db.connection)
