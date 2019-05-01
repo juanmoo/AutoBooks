@@ -16,7 +16,7 @@ User:
 
 
 Admin:
-1. Query Transactions
+1. Query Transactions -- TODO
 2. Create payment
 3. Create new user
 4. Create new officer
@@ -25,7 +25,9 @@ Admin:
 
 from database_setup import initialize_database
 from database_setup import user_table, officer_table, transaction_table, payment_table, payment_transaction_table
+from database_setup import User, Officer, Transaction, Payment, Payment_Transaction
 from datetime import date, datetime
+from sqlalchemy.orm import sessionmaker
 
 class DataBase(object):
     def __init__(self, user, password, host, name, port=3306):
@@ -37,31 +39,45 @@ class DataBase(object):
             'port':port
         }
         self.engine, self.connection = initialize_database(**kwargs)
+        self.Session = sessionmaker(bind=self.engine)
+
 
     # ===== Admin Functions ===== #
     def create_user(self, name, cellphone='', kerberos='', email=''):
+
+        session = self.Session()
+        # Before making new user, check that no other user w/ the same kerberos and or email exists
+
         kwargs = {
            'name':name,
            'cellphone':cellphone,
            'kerberos':kerberos,
            'email':email 
         }
-        insert = user_table.insert().values(**kwargs)
-        res = self.connection.execute(insert)
-        return res
+
+        new_user = User(**kwargs)
+        session.add(new_user)
+        session.commit()
+        session.close()
     
     def create_officer(self, user_id, position, year, term):
+        session = self.Session()
+
         kwargs = {
             'user_id':user_id,
             'position':position,
             'year':year,
             'term':term
         }
-        insert = officer_table.insert().values(**kwargs)
-        res = self.connection.execute(insert)
-        return res
+
+        new_officer = Officer(**kwargs)
+        session.add(new_officer)
+        session.commit()
+        session.close()
 
     def create_payment(self, agent, amount, method, transactions, check_number=None, comment=None):
+
+        session = self.Session()
 
         # Create new payment object
         ts = datetime.now()
@@ -74,25 +90,27 @@ class DataBase(object):
             'comment':comment
         }
 
-        insert = payment_table.insert().values(**kwargs)
-        res = self.connection.execute(insert)
-        if not res:
-            raise(Exception('Insertion Failed'))
+        new_payment = Payment(**kwargs)
+        session.add(new_payment)
+        session.commit()
 
-        payment_id = res.lastrowid
+        payment_id = new_payment.id
 
         # Create entries in payment_transaction table
         # transactions is a list of transaction IDs.
 
-        args = [ {'payment_id': payment_id, 'transaction_id':t} for t in transactions ]
-        insert = payment_transaction_table.insert()
-        res = self.connection.execute(insert, args)
-        
-        return res
+        pt_kwargs = [ {'payment_id': payment_id, 'transaction_id':t} for t in transactions ]
+        pt_objects = [Payment_Transaction(**kwargs) for kwargs in pt_kwargs]
+        session.add_all(pt_objects)
+        session.commit()
+
+        session.close()
 
 
     # ===== User Functions ===== #
-    def create_transaction(self, user_id, budget, year, term, approver_id, transaction_date, amount, payment_method, comment, receipt_path):
+    def create_transaction(self, user_id, budget, year, term, approver_id, transaction_date, amount, payment_method, comment, receipt_path, is_payed=False):
+        session = self.Session()
+
         timestamp = datetime.now()
         kwargs = {
             'agent':user_id,
@@ -105,16 +123,14 @@ class DataBase(object):
             'payment_method':payment_method, 
             'comment':comment, 
             'receipt_path':receipt_path,
+            'is_payed':is_payed,
             'ts':timestamp
         }
-        insert = transaction_table.insert().values(**kwargs)
-        res = self.connection.execute(insert)
-        return res
-
-
-
-
-
+        
+        new_transaction = Transaction(**kwargs)
+        session.add(new_transaction)
+        session.commit()
+        session.close()
 
 if __name__ == '__main__':    
     user = 'admin'
@@ -133,11 +149,10 @@ if __name__ == '__main__':
     # Test creating a new transaction
     today = date.today()
     res = db.create_transaction(1, 'tech_chair', 2019, 'spring', 1, today, 0.69, 'venmo', 'hello', '~/Documents/Desktop/image')
-    transaction_id = res.lastrowid
 
     # Test creating a payment
-    db.create_payment(1, 2.34, 'venmo', [1,transaction_id], check_number=None, comment=None)
+    transaction_id = 1
+    db.create_payment(1, 2.34, 'venmo', [transaction_id], check_number=None, comment=None)
 
 
     print(db.engine, db.connection)
-        

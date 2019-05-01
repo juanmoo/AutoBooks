@@ -38,7 +38,7 @@ officer_args = [
 ]
 officer_table = Table(*officer_args)
 
-class OfficerTable(Base):
+class Officer(Base):
     __tablename__ = 'officer'
     id = Column(Integer, primary_key=True)
     position = Column(String(100), nullable=False)
