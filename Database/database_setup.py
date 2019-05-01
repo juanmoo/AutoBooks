@@ -1,8 +1,10 @@
 from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base
 from urllib.parse import quote_plus 
 
 # ========== Table Definitions ========== #
 metadata = MetaData()
+Base = declarative_base()
 
 # -- User Table -- #
 user_args = [
@@ -16,6 +18,14 @@ user_args = [
 ]
 user_table = Table(*user_args)
 
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    cellphone = Column(String(100))
+    kerberos = Column(String(100))
+    email = Column(String(200))
+
 # -- Officer Table -- #
 officer_args = [
     'officer',
@@ -27,6 +37,14 @@ officer_args = [
     Column('term', String(100), nullable=False)
 ]
 officer_table = Table(*officer_args)
+
+class OfficerTable(Base):
+    __tablename__ = 'officer'
+    id = Column(Integer, primary_key=True)
+    position = Column(String(100), nullable=False)
+    user_id = Column(None, ForeignKey('user.id'))
+    year = Column(Integer, nullable=False)
+    term = Column(String(100), nullable=False)
 
 # -- Transaction Table -- #
 transaction_args = [
@@ -47,6 +65,22 @@ transaction_args = [
     Column('ts', DateTime)
 ]
 transaction_table = Table(*transaction_args)
+class Transaction(Base):
+    __tablename__ = 'transaction'
+
+    id = Column( Integer, primary_key=True )
+    agent = Column( None, ForeignKey('user.id') )
+    budget = Column( String(100) )
+    year = Column( Integer )
+    term = Column( String(100) )
+    approver = Column( None, ForeignKey('officer.id') )
+    transaction_date = Column( Date )
+    amount = Column( Float, nullable=False )
+    payment_method = Column( String(100) )
+    is_payed = Column( Boolean, nullable=False )
+    comment = Column( String(500) )
+    receipt_path = Column( String(500) )
+    ts = Column( DateTime )
 
 # -- Payment Table -- #
 payment_args = [
@@ -62,6 +96,17 @@ payment_args = [
 ]
 payment_table = Table(*payment_args)
 
+class Payment(Base):
+    __tablename__ = 'payment'
+
+    id = Column( Integer, primary_key=True )
+    ts = Column( DateTime )
+    agent = Column( None, ForeignKey('user.id') )
+    amount = Column( Float, nullable=False )
+    method = Column( String(100) )
+    check_number = Column( Integer )
+    comment = Column( String(500) )
+
 # -- Payment-Transaction Table -- #
 payment_transaction_args = [
     'payment_transaction',
@@ -70,6 +115,12 @@ payment_transaction_args = [
     Column('transaction_id', Integer, ForeignKey('transaction.id'), primary_key=True)
 ]
 payment_transaction_table = Table(*payment_transaction_args)
+
+class Payment_Transaction(Base):
+    __tablename__ = 'payment_transaction'
+
+    payment_id = Column( Integer, ForeignKey('payment.id'), primary_key=True )
+    transaction_id = Column( Integer, ForeignKey('transaction.id'), primary_key=True )
 
 
 def initialize_database(user, password, host, database, port=3306):
@@ -85,7 +136,8 @@ def initialize_database(user, password, host, database, port=3306):
     # Connect to database, initialize tables, and return connection.
     engine = create_engine(engine_route, pool_recycle=3600)
     connection = engine.connect()
-    metadata.create_all(engine)
+    Base.metadata.create_all(engine)
+    #metadata.create_all(engine)
 
     return (engine, connection)
 
