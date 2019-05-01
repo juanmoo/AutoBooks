@@ -43,6 +43,7 @@ transaction_args = [
     Column('payment_method', String(100)),
     Column('is_payed', Boolean, nullable=False),
     Column('comment', String(500)),
+    Column('receipt_path', String(500)),
     Column('ts', DateTime)
 ]
 transaction_table = Table(*transaction_args)
@@ -95,6 +96,6 @@ if __name__ == "__main__":
     password = 'myPassword'
     host = 'testdb.cfamyzflglg0.us-east-1.rds.amazonaws.com'
     dbname = 'testDB'
-    
+
     res = initialize_database(user, password, host, dbname)
     print('res:', res)
