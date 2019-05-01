@@ -22,7 +22,7 @@ officer_args = [
     metadata,
     Column('id', Integer, primary_key=True),
     Column('position', String(100), nullable=False),
-    Column('brother_id', None, ForeignKey('user.id')),
+    Column('user_id', None, ForeignKey('user.id')),
     Column('year', Integer, nullable=False),
     Column('term', String(100), nullable=False)
 ]
@@ -87,7 +87,7 @@ def initialize_database(user, password, host, database, port=3306):
     connection = engine.connect()
     metadata.create_all(engine)
 
-    return connection
+    return (engine, connection)
 
 
 
