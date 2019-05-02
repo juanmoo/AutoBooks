@@ -47,7 +47,22 @@ class DataBase(object):
 
         session = self.Session()
         # Before making new user, check that no other user w/ the same kerberos and or email exists
+        
+        if len(kerberos) > 0:
+           res = list(session.query(User.kerberos).filter(User.kerberos == kerberos))
+           if len(res) > 0:
+               raise Exception("Kerberos \'%s\' already in database"%kerberos)
 
+        if len(email) > 0:
+           res = list(session.query(User.email).filter(User.email == email))
+           if len(res) > 0:
+               raise Exception("Email already in database")
+
+        if len(cellphone) > 0:
+           res = list(session.query(User.cellphone).filter(User.cellphone == cellphone))
+           if len(res) > 0:
+               raise Exception("Cellphone already in database")
+        
         kwargs = {
            'name':name,
            'cellphone':cellphone,
