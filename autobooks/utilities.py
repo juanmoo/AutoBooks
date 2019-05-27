@@ -23,9 +23,8 @@ Admin:
 
 '''
 
-from database_setup import initialize_database
-from database_setup import user_table, officer_table, transaction_table, payment_table, payment_transaction_table
-from database_setup import User, Officer, Transaction, Payment, Payment_Transaction
+from autobooks.database_setup import initialize_database
+from autobooks.database_setup import User, Officer, Transaction, Payment, Payment_Transaction
 from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
 
@@ -43,7 +42,7 @@ class DataBase(object):
 
 
     # ===== Admin Functions ===== #
-    def create_user(self, name, cellphone='', kerberos='', email=''):
+    def create_user(self, first_name, last_name, cellphone='', kerberos='', email=''):
 
         session = self.Session()
         # Before making new user, check that no other user w/ the same kerberos and or email exists
@@ -64,7 +63,8 @@ class DataBase(object):
                raise Exception("Cellphone already in database")
         
         kwargs = {
-           'name':name,
+           'first_name':first_name,
+           'last_name':last_name,
            'cellphone':cellphone,
            'kerberos':kerberos,
            'email':email 
@@ -74,6 +74,7 @@ class DataBase(object):
         session.add(new_user)
         session.commit()
         session.close()
+        return new_user
     
     def create_officer(self, user_id, position, year, term):
         session = self.Session()
@@ -90,7 +91,7 @@ class DataBase(object):
         session.commit()
         session.close()
 
-    def create_payment(self, agent, amount, method, transactions, check_number=None, comment=None):
+    def create_payment(self, payer, payee, amount, method, transactions, external_id=None, comment=None):
 
         session = self.Session()
 
@@ -98,10 +99,11 @@ class DataBase(object):
         ts = datetime.now()
         kwargs = {
             'ts':ts,
-            'agent':agent,
+            'payer':payer,
+            'payee':payee,
             'amount':amount,
             'method':method,
-            'check_number':check_number,
+            'external_id':external_id,
             'comment':comment
         }
 
@@ -148,15 +150,16 @@ class DataBase(object):
         session.close()
 
 if __name__ == '__main__':    
-    user = 'admin'
-    password = 'myPassword'
-    host = 'testdb.cfamyzflglg0.us-east-1.rds.amazonaws.com'
+    user = 'root'
+    password = 'password'
+    host = 'localhost'
     dbname = 'testDB'
 
     db = DataBase(user, password, host, dbname)
 
     # Test creating new user
-    db.create_user('juan', '5136141878', 'juanmoo', 'juanmoo@mit.edu')
+    db.create_user('juan', 'ortiz',  '5136141878', 'juanmoo', 'juanmoo@mit.edu')
+    db.create_user('kevin', 'ortiz',  '426436234', 'kevindoo', 'kevindoo@mit.edu')
 
     # Test creating new officer
     db.create_officer(1, 'treasurer', 2019, 'spring')
@@ -167,7 +170,7 @@ if __name__ == '__main__':
 
     # Test creating a payment
     transaction_id = 1
-    db.create_payment(1, 2.34, 'venmo', [transaction_id], check_number=None, comment=None)
+    db.create_payment(1, 2, 2.34, 'venmo', [transaction_id], external_id=None, comment=None)
 
 
     print(db.engine, db.connection)
