@@ -1,0 +1,4 @@
+*.pyc
+__pycache__
+autobooks/__pycache__
+env/
