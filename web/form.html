@@ -3,48 +3,55 @@
 <html>
     <head>
         <title>Reimbursement Request Form</title>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<link rel="stylesheet" href="style.css">
     </head>
 
     <body>
-        <p>Theta Chi Beta Chapter Reimbursement Form</p>
+
+	<div class="boxed">
+	<p> <font size="20">OX Reimbursement Form</font></p>
+	</div>
+
+	<div class="main_form">
+		<form>
+        		What is your Kerberos?<br>
+			<select id="kerberos_select" name="kerberos_select"></select><br>
+        		
+        		Budget<br>
+        		<select id="budget_select" name="budget">
+        		</select><br>
+
+        		Officer who approved transaction:<br>
+        		<input type="text" name="officer"><br>
+
+        		Date of Transaction:<br>
+        		<input type="date" name="date"><br>
+
+        		Description:
+        		<input type="text" name="description"><br>
+
+        		Amount:<br>
+        		<input type="number" name="amount"><br>
+
+        		Receipt<br>
+        		TBD<br>
+
+        		How would you like to get reimbursed?<br>
+        		<select name="payment_method">
+        		    <option>Venmo</option>
+        		    <option>Check</option>
+        		    <option>Other</option>
+        		</select><br>
+        		Other:
+        		<input type="text" name="other_method">
+		</form>
+	</div>
+
     </body>
 
-    <form>
-        What is your Kerberos?<br>
-        <input type="text" name="kerberos"><br>
-        
-        Budget<br>
-        <select name="budget">
-            <option value="budget1">budget1</option>
-            <option value="budget2">budget2</option>
-            <option value="budget3">budget3</option>
-            <option value="budget4">budget4</option>
-        </select><br>
 
-        Officer who approved transaction:<br>
-        <input type="text" name="officer"><br>
+    <!-- Scripts -->
+    <script type="text/javascript" src="./jq-script.js"></script>
 
-        Date of Transaction:<br>
-        <input type="date" name="date"><br>
-
-        Description:
-        <input type="text" name="description"><br>
-
-        Amount:<br>
-        <input type="number" name="amount"><br>
-
-        Receipt<br>
-        TBD<br>
-
-        How would you like to get reimbursed?<br>
-        <select name="payment_method">
-            <option>Venmo</option>
-            <option>Check</option>
-            <option>Other</option>
-        </select><br>
-        Other:
-        <input type="text" name="other_method">
-
-
-    </form>
 </html>
