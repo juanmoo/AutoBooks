@@ -5,6 +5,14 @@ from urllib.parse import quote_plus
 # ========== Table Definitions ========== #
 Base = declarative_base()
 
+# -- Categories -- #
+# This tables stores the names of the different budgets #
+class Category(Base):
+    __tablename__ = 'category'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    __table_args__ = (UniqueConstraint('name'),)
+
 # -- User Table -- #
 class User(Base):
     __tablename__ = 'user'

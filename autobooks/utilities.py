@@ -24,9 +24,10 @@ Admin:
 '''
 
 from autobooks.database_setup import initialize_database
-from autobooks.database_setup import User, Officer, Transaction, Payment, Payment_Transaction
+from autobooks.database_setup import User, Officer, Transaction, Payment, Payment_Transaction, Category
 from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
+import json
 
 class DataBase(object):
     def __init__(self, user, password, host, name, port=3306):
@@ -39,6 +40,23 @@ class DataBase(object):
         }
         self.engine, self.connection = initialize_database(**kwargs)
         self.Session = sessionmaker(bind=self.engine)
+
+        # Load Categories #
+        config_path = "autobooks/config.json"
+        with open(config_path, 'r') as config_file:
+            payload = config_file.read()
+            try:
+                config_dict = json.loads(payload)
+            except:
+                raise Exception("Invalid Configuration File")
+        session = self.Session()
+        for category_name in config_dict['categories']:
+            exists = session.query(Category).filter(Category.name==category_name).first()
+            if not exists:
+                new_category = Category(name=category)
+                session.add(new_category)
+        session.commit()
+        session.close()
 
 
     # ===== Admin Functions ===== #
