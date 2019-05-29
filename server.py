@@ -6,10 +6,14 @@ Application Webserver
 '''
 
 from flask import Flask, request
+from flask_cors import CORS
 import autobooks.utilities as util
 from autobooks.database_setup import *
+from urllib.parse import quote
+import json
 
 app = Flask(__name__)
+CORS(app)
 
 ## Start DB ##
 db = util.DataBase(
@@ -20,10 +24,31 @@ db = util.DataBase(
     )
 
 
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return "Hello Diana!"
+    action = request.args.get('action', 'none')
+
+    if (action == 'get_form_info'):
+        info = {}
+        session = db.Session()
+        # Get ID, NAME for all users
+        res = session.query(User.id, User.first_name, User.last_name).all()
+        users = {e[0]:"{first} {last}".format(first=e[1].strip(), last=e[2].strip()) for e in res}
+        info['users'] = users
+
+        # Get Categories
+        res = session.query(Category.id, Category.name).all()
+        categories = {e[0]: e[1] for e in res}
+        info['categories'] = categories
+
+        session.close()
+
+        return json.dumps(info)
+
+    return "NOTHING TO SEE HERE"
+
+
+
 
 @app.route('/users', methods=['GET', 'POST'])
 def users():
@@ -79,9 +104,12 @@ def users():
 
     elif(action == 'list_all'):
         session = db.Session()
-        res = session.query(User.first_name, User.last_name)
+        res = session.query(User.id, User.first_name, User.last_name).all()
         session.close()
-        return str(list(res))
+        names = {e[0]:"{first} {last}".format(first=e[1].strip(), last=e[2].strip()) for e in res}
+        out = {'names':names}
+        return json.dumps(out)
 
+    
     return "Nothing Happened"
 
