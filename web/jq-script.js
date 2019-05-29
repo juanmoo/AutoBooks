@@ -19,17 +19,25 @@ function populateFrom (response) {
 	res = JSON.parse(response);
 	console.log(response);
 
-	// Fill Name Form
+	// Fill User and Officer
 	names = res["users"];
 	console.log(names);
 
 	$.each(names, function(key, val) {
-		$("#kerberos_select").append(
+		$("#user_select").append(
 			$("<option>", {
 				value: key,
 				text: val
 			})
 		);
+
+		$("#officer_select").append(
+			$("<option>", {
+				value: key,
+				text: val
+			})
+		);
+
 	});
 
 	// Fill Categories
