@@ -2,9 +2,13 @@
 
 // Load People from database //
 $(document).ready( function() {
+	// URL server
+	url_base = "http://localhost:5000";
+
 
 	/* Populate Form Options */
-	const URL = "http://localhost:5000/reimbursements?action=get_form_info";
+	//const URL = "http://localhost:5000/reimbursements?action=get_form_info";
+	const URL = url_base + "/reimbursements?action=get_form_info";
 	$.ajax({
 		url: URL,
 		type: "GET",
@@ -14,7 +18,8 @@ $(document).ready( function() {
 		}
 	})
 
-	$("#main_form").submit( submitForm );
+	$("#form_div").submit( submitForm );
+	$("#main_form").attr("action", url_base + "/reimbursements");
 
 })
 
