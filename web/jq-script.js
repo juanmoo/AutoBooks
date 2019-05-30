@@ -2,7 +2,9 @@
 
 // Load People from database //
 $(document).ready( function() {
-	const URL = "http://localhost:5000/?action=get_form_info";
+
+	/* Populate Form Options */
+	const URL = "http://localhost:5000/reimbursements?action=get_form_info";
 	$.ajax({
 		url: URL,
 		type: "GET",
@@ -12,8 +14,16 @@ $(document).ready( function() {
 		}
 	})
 
+	$("#main_form").submit( submitForm );
+
 })
 
+
+function submitForm() {
+
+	console.log("The form was submitted!");
+
+}
 
 function populateFrom (response) {
 	res = JSON.parse(response);
@@ -31,13 +41,20 @@ function populateFrom (response) {
 			})
 		);
 
+		
+	});
+
+	// Fill Officers
+	officers = res["officers"];
+	console.log(officers);
+
+	$.each(officers, function(id, val) {
 		$("#officer_select").append(
 			$("<option>", {
-				value: key,
+				value: id,
 				text: val
 			})
 		);
-
 	});
 
 	// Fill Categories
@@ -51,4 +68,6 @@ function populateFrom (response) {
 			})
 		);
 	});
+
+
 }

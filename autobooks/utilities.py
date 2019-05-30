@@ -53,7 +53,7 @@ class DataBase(object):
         for category_name in config_dict['categories']:
             exists = session.query(Category).filter(Category.name==category_name).first()
             if not exists:
-                new_category = Category(name=category)
+                new_category = Category(name=category_name)
                 session.add(new_category)
         session.commit()
         session.close()
@@ -143,7 +143,7 @@ class DataBase(object):
 
 
     # ===== User Functions ===== #
-    def create_transaction(self, user_id, budget, year, term, approver_id, transaction_date, amount, payment_method, comment, receipt_path, is_payed=False):
+    def create_transaction(self, user_id, budget, year, term, approver_id, transaction_date, amount, payment_method, description, comment, receipt_path, is_payed=False):
         session = self.Session()
 
         timestamp = datetime.now()
@@ -159,7 +159,8 @@ class DataBase(object):
             'comment':comment, 
             'receipt_path':receipt_path,
             'is_payed':is_payed,
-            'ts':timestamp
+            'ts':timestamp,
+            'description':description
         }
         
         new_transaction = Transaction(**kwargs)

@@ -7,23 +7,24 @@
 	<link rel="stylesheet" href="style.css">
     </head>
 
+
     <body>
 
 	<div class="boxed">
 	<p> <font size="20">OX Reimbursement Form</font></p>
 	</div>
 
-	<div class="main_form">
-		<form>
+	<div class="main_form" id="main_form">
+		<form action="http://localhost:5000/reimbursements" method="POST" target="resFrame">
         		Who are you?<br>
-			<select id="user_select" name="user_select"></select><br>
+			<select id="user_select" name="user"></select><br>
         		
         		Budget<br>
         		<select id="budget_select" name="budget">
         		</select><br>
 
         		Officer who approved transaction:<br>
-			<select id="officer_select" name="officer_select"></select><br>
+			<select id="officer_select" name="officer"></select><br>
 
         		Date of Transaction:<br>
         		<input type="date" name="date"><br>
@@ -32,7 +33,7 @@
         		<input type="text" name="description"><br>
 
         		Amount:<br>
-        		<input type="number" name="amount"><br>
+        		<input type="float" name="amount"><br>
 
         		Receipt<br>
         		TBD<br>
@@ -45,6 +46,14 @@
         		</select><br>
         		Other:
         		<input type="text" name="other_method">
+			<br>
+
+			Comment:
+			<input type="text" name="comment"><br>
+
+
+			<input type="submit">
+
 		</form>
 	</div>
 
@@ -53,5 +62,6 @@
 
     <!-- Scripts -->
     <script type="text/javascript" src="./jq-script.js"></script>
+    <iframe name="resFrame" style="visibility:hidden"></frame>
 
 </html>

@@ -11,6 +11,7 @@ import autobooks.utilities as util
 from autobooks.database_setup import *
 from urllib.parse import quote
 import json
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -24,28 +25,58 @@ db = util.DataBase(
     )
 
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    action = request.args.get('action', 'none')
+@app.route('/reimbursements', methods=['GET', 'POST'])
+def reimbursements():
 
-    if (action == 'get_form_info'):
-        info = {}
-        session = db.Session()
-        # Get ID, NAME for all users
-        res = session.query(User.id, User.first_name, User.last_name).all()
-        users = {e[0]:"{first} {last}".format(first=e[1].strip(), last=e[2].strip()) for e in res}
-        info['users'] = users
+    if request.method == 'GET':
+        action = request.args.get('action', 'none')
+        if (action == 'get_form_info'):
+            info = {}
+            session = db.Session()
+            # Get ID, NAME for all users
+            res = session.query(User.id, User.first_name, User.last_name).all()
+            users = {e[0]:"{first} {last}".format(first=e[1].strip(), last=e[2].strip()) for e in res}
+            info['users'] = users
 
-        # Get Categories
-        res = session.query(Category.id, Category.name).all()
-        categories = {e[0]: e[1] for e in res}
-        info['categories'] = categories
+            # Get Categories
+            res = session.query(Category.id, Category.name).all()
+            categories = {e[0]: e[1] for e in res}
+            info['categories'] = categories
 
-        session.close()
+            # Get Officers
+            res = session.query(Officer.id, Officer.position, User.first_name, User.last_name).\
+                    filter(Officer.user_id == User.id).all()
+            officers = {e[0]: "{first} {last} - {title}".format(first=e[2], last=e[3], title=e[1]) for e in res}
+            info['officers'] = officers
 
-        return json.dumps(info)
+            session.close()
 
-    return "NOTHING TO SEE HERE"
+            return json.dumps(info)
+
+    elif request.method == 'POST':
+        res = request.form
+        
+        uid = int(res['user'])
+        budget = int(res['budget'])
+        datestring = res['date']
+        trans_date = datetime.datetime.strptime(datestring, "%Y-%m-%d").date()
+        year = 2019
+        term = 'SPRING'
+        officer = int(res['officer'])
+        amount = float(res['amount'])
+        payment_method = res['payment_method']
+        comment = res['comment']
+        receipt_path = ''
+        description = res['description']
+
+
+        # Create the new transaction
+        db.create_transaction(uid, budget, year, term, officer, trans_date, amount, payment_method, description, comment, receipt_path)
+
+
+        return str(res)
+
+    return "There be Dragons HERE"
 
 
 
@@ -112,4 +143,5 @@ def users():
 
     
     return "Nothing Happened"
+
 
