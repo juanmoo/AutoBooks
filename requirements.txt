@@ -1,6 +1,6 @@
 APScheduler==3.5.1
 astroid==2.0.4
-certifi==2018.8.13
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 Flask==1.0.2
